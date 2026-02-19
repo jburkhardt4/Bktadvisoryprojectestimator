@@ -11,7 +11,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="text-white py-12 bg-[#0f172b]">
+    <footer className="text-white py-12 bg-gradient-to-r from-[#0F172B] via-[#1e293b] to-[#0F172B]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid md:grid-cols-3 gap-12 pb-8 border-b border-neutral-800">
           {/* Brand */}
