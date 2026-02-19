@@ -1,5 +1,16 @@
 @custom-variant dark (&:is(.dark *));
 
+/* Hide injected "Skip to main content" link from preview environment */
+.bypass-link,
+a[role="link"][tabindex="0"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
