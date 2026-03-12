@@ -17,6 +17,7 @@ const XIcon = ({ size }: { size?: number }) => (
 );
 
 import logo from 'figma:asset/01ab4ddf9498ad72150c22c58a71c1af4fd5772b.png';
+import mobileLogo from 'figma:asset/0e0a121653cc931918711be760206409b22eeac2.png';
 import { ScheduleCallButton } from './ScheduleCallButton';
 
 export function Navigation({ 
@@ -41,7 +42,8 @@ export function Navigation({
           {/* Logo */}
           <div className="py-4">
             <a href="https://bktadvisory.com" className="block">
-              <img src={logo} alt="BKT Advisory Logo" className="h-[68px] w-auto" />
+              <img src={logo} alt="BKT Advisory Logo" className="hidden md:block h-[68px] w-auto" />
+              <img src={mobileLogo} alt="BKT Advisory Logo" className="block md:hidden h-[60px] w-auto" />
             </a>
           </div>
 

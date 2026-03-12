@@ -453,9 +453,9 @@ export function AIChatbot({
       Use these keys: selectedCRMs, selectedClouds, selectedIntegrations, selectedAITools, additionalModules.
       
       Valid options for CRMs: Salesforce, Dynamics 365, GoHighLevel, HubSpot, Monday.com, Zoho.
-      Valid Clouds: Sales Cloud, Service Cloud, Marketing Cloud, Commerce Cloud, Financial Services Cloud, Experience Cloud, Agentforce.
+      Valid Clouds: Sales Cloud, Service Cloud, Marketing Cloud, Commerce Cloud, Financial Services Cloud, Experience Cloud, CPQ, Insurance Cloud, Agentforce.
       Valid Integrations: Slack, Asana, Jira, GitHub, Google Workspace, Microsoft 365, Zoom, DocuSign, Make.com, Zapier, n8n, MuleSoft.
-      Valid AI Tools: OpenAI ChatGPT, Gemini, Copilot, Claude.
+      Valid AI Tools: OpenAI, Gemini, Copilot, Claude.
       Valid Modules: Reporting and Dashboards, Workflow Automation, Custom Development, Lead Management, Data Migration, User Training.`;
     
     // Don't open chat - just send the message silently
