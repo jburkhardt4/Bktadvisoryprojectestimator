@@ -1,5 +1,3 @@
-Bktadvisoryprojectestimator - AGENTS.md
-
 # AGENTS.md — BKT Advisory Project Estimator
 
 You are working in the BKT Advisory Tech Project Estimator repository.
