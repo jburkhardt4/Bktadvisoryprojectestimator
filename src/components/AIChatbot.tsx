@@ -91,6 +91,7 @@ export function AIChatbot({
   const [hasGreeted, setHasGreeted] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingIframeUrl, setBookingIframeUrl] = useState<string | null>(null);
+  const [isAutofilling, setIsAutofilling] = useState(false);
 
   const formatMessageText = (text: string, sender: "user" | "bot") => {
     if (sender !== "bot") return text;
@@ -250,6 +251,11 @@ export function AIChatbot({
       const data = await response.json();
 
       let botText = data.content || "";
+
+      let isJson = false;
+      let parsedJson = null;
+      let isCalendarBooking = false;
+      let isEstimatorUpdate = false;
       
       // Check for hidden OPEN_BOOKING tag from AI
       if (botText.includes(":::OPEN_BOOKING:::")) {
@@ -258,11 +264,6 @@ export function AIChatbot({
         // Enable inline booking cards in the chat
         isCalendarBooking = true;
       }
-
-      let isJson = false;
-      let parsedJson = null;
-      let isCalendarBooking = false;
-      let isEstimatorUpdate = false;
 
       // Check if the response contains the Google Calendar booking URL
       const calendarUrlRegex = /https:\/\/calendar\.google\.com\/calendar\/appointments\/[^\s]+/;
@@ -416,22 +417,30 @@ export function AIChatbot({
     handleSendMessage(prompt, true); // Pass true to show action buttons
   };
 
-  const handleAutofillFromDescription = () => {
-    if (!formData?.projectDescription?.trim()) {
-      setIsOpen(true); // Open chat when empty
-      handleSendMessage("I'd like to autofill the estimator, but the project description is empty. Can you please provide details using this format?\n\n- **Systems:** (e.g. Salesforce, Slack)\n- **Pain Points:** (e.g. manual data entry)\n- **Goals:** (e.g. automate lead routing)\n- **Users:** (e.g. 50 sales reps)");
+  const handleAutofillFromDescription = async () => {
+    // Build combined context from scope fields + project description
+    const scopeGoals = formData?.scopeGoals?.trim() || '';
+    const scopeProblems = formData?.scopeProblems?.trim() || '';
+    const scopeRequirements = formData?.scopeRequirements?.trim() || '';
+    const projectDesc = formData?.projectDescription?.trim() || '';
+
+    const combinedContext = [projectDesc, scopeGoals, scopeProblems, scopeRequirements].filter(Boolean).join(' ');
+
+    if (!combinedContext) {
+      setIsOpen(true);
+      handleSendMessage("I'd like to autofill the estimator, but the project scope and description are empty. Can you please provide details using this format?\n\n- **Systems:** (e.g. Salesforce, Slack)\n- **Pain Points:** (e.g. manual data entry)\n- **Goals:** (e.g. automate lead routing)\n- **Users:** (e.g. 50 sales reps)");
       return;
     }
 
-    // Check for critical information in the project description
-    const description = formData.projectDescription.toLowerCase();
-    const hasSystems = /salesforce|dynamics|gohighlevel|hubspot|monday|zoho|crm|slack|asana|jira|github|google|microsoft|zoom|docusign|make|zapier|n8n|mulesoft|cloud|integration/i.test(description);
-    const hasPainPoints = /pain|challenge|issue|problem|difficulty|struggle|bottleneck|manual|inefficient/i.test(description);
-    const hasGoals = /goal|outcome|objective|want|need|require|automate|improve|increase|reduce|streamline/i.test(description);
-    const hasAutomations = /automate|automation|workflow|integrate|integration|connect|sync/i.test(description);
-    const hasDeliverables = /deliver|deliverable|requirement|feature|functionality|capability|module/i.test(description);
+    // Check for critical information across ALL available context
+    const fullText = combinedContext.toLowerCase();
+    const hasSystems = /salesforce|dynamics|gohighlevel|hubspot|monday|zoho|crm|slack|asana|jira|github|google|microsoft|zoom|docusign|make|zapier|n8n|mulesoft|cloud|integration/i.test(fullText);
+    const hasPainPoints = /pain|challenge|issue|problem|difficulty|struggle|bottleneck|manual|inefficient/i.test(fullText);
+    const hasGoals = /goal|outcome|objective|want|need|require|automate|improve|increase|reduce|streamline/i.test(fullText);
+    const hasAutomations = /automate|automation|workflow|integrate|integration|connect|sync/i.test(fullText);
+    const hasDeliverables = /deliver|deliverable|requirement|feature|functionality|capability|module/i.test(fullText);
     
-    const missingCriticalInfo = [];
+    const missingCriticalInfo: string[] = [];
     if (!hasSystems) missingCriticalInfo.push('**Current systems/infrastructure**');
     if (!hasPainPoints) missingCriticalInfo.push('**Pain points/challenges**');
     if (!hasGoals) missingCriticalInfo.push('**Desired outcomes & goals**');
@@ -440,26 +449,162 @@ export function AIChatbot({
 
     // If critical info is missing, open the chat and ask for it
     if (missingCriticalInfo.length > 0) {
-      setIsOpen(true); // Open chat to request missing info
+      setIsOpen(true);
       const missingList = missingCriticalInfo.join('\n• ');
       handleSendMessage(`I'd like to autofill your estimator, but I need more information. Please add details about:\n\n• ${missingList}\n\nOptionally, you can also include:\n• Timeline & budget constraints\n\nThis will help me provide a more accurate configuration!`);
       return;
     }
 
-    // If all critical info is present, autofill silently (don't open chat)
-    const prompt = `Parse the following project description and return ONLY a JSON object containing the matching configurations. 
-      Description: "${formData.projectDescription}"
-      
-      Use these keys: selectedCRMs, selectedClouds, selectedIntegrations, selectedAITools, additionalModules.
-      
-      Valid options for CRMs: Salesforce, Dynamics 365, GoHighLevel, HubSpot, Monday.com, Zoho.
-      Valid Clouds: Sales Cloud, Service Cloud, Marketing Cloud, Commerce Cloud, Financial Services Cloud, Experience Cloud, CPQ, Insurance Cloud, Agentforce.
-      Valid Integrations: Slack, Asana, Jira, GitHub, Google Workspace, Microsoft 365, Zoom, DocuSign, Make.com, Zapier, n8n, MuleSoft.
-      Valid AI Tools: OpenAI, Gemini, Copilot, Claude.
-      Valid Modules: Reporting and Dashboards, Workflow Automation, Custom Development, Lead Management, Data Migration, User Training.`;
-    
-    // Don't open chat - just send the message silently
-    handleSendMessage(prompt, true); // Pass true to show action buttons
+    // Build structured context for the AI, pulling from all available fields
+    const contextSections: string[] = [];
+    if (projectDesc) contextSections.push(`Project Description: "${projectDesc}"`);
+    if (scopeGoals) contextSections.push(`Goals: "${scopeGoals}"`);
+    if (scopeProblems) contextSections.push(`Problems: "${scopeProblems}"`);
+    if (scopeRequirements) contextSections.push(`Requirements: "${scopeRequirements}"`);
+
+    const prompt = `Parse the following project context and return ONLY a JSON object containing the matching configurations.\n\n${contextSections.join('\n')}\n\nUse these keys: selectedCRMs, selectedClouds, selectedIntegrations, selectedAITools, additionalModules.\n\nValid options for CRMs: Salesforce, Dynamics 365, GoHighLevel, HubSpot, Monday.com, Zoho.\nValid Clouds: Sales Cloud, Service Cloud, Marketing Cloud, Commerce Cloud, Financial Services Cloud, Experience Cloud, CPQ, Insurance Cloud, Agentforce.\nValid Integrations: Slack, Asana, Jira, GitHub, Google Workspace, Microsoft 365, Zoom, DocuSign, Make.com, Zapier, n8n, MuleSoft.\nValid AI Tools: OpenAI, Gemini, Copilot, Claude.\nValid Modules: Reporting and Dashboards, Workflow Automation, Custom Development, Lead Management, Data Migration, User Training.`;
+
+    // Show user message in chat
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: prompt,
+      sender: "user",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Set loading states for visual feedback
+    setIsAutofilling(true);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-07a007e1/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${publicAnonKey}`,
+          },
+          body: JSON.stringify({
+            current_page: currentPage,
+            current_date: new Date().toLocaleDateString(),
+            project_goals: prompt,
+          }),
+        },
+      );
+
+      if (response.status === 429) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString() + "-quota",
+            text: "I've reached my usage limit for today. Please contact BKT Advisory directly for assistance or try again later.",
+            sender: "bot",
+            timestamp: new Date(),
+          },
+        ]);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (_e) {
+          throw new Error(`Server Error (${response.status}): ${errorText.substring(0, 200)}`);
+        }
+        throw new Error(errorData.details || errorData.error || `Server Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const rawContent = data.content || "";
+
+      // ── Robust JSON extraction ──
+      // Strip accidental markdown code fences the AI may still wrap around JSON
+      let cleanJson = rawContent.trim();
+      const codeBlockMatch = cleanJson.match(/```(?:json|JSON)?\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        cleanJson = codeBlockMatch[1].trim();
+      }
+      // Also handle bare backtick prefix/suffix
+      cleanJson = cleanJson.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+
+      let parsedData: any = null;
+
+      try {
+        if (cleanJson.startsWith('{') || cleanJson.startsWith('[')) {
+          parsedData = JSON.parse(cleanJson);
+        } else {
+          throw new Error("Response is not JSON");
+        }
+      } catch (parseError) {
+        console.error("Autofill JSON parse error:", parseError);
+        console.error("Raw AI response (first 500 chars):", rawContent.substring(0, 500));
+
+        // Graceful fallback message in the chat
+        const fallbackMessage: Message = {
+          id: Date.now().toString() + "-autofill-error",
+          text: "I couldn't perfectly map the configuration from your description. Let's select the infrastructure manually — head to the IT Infrastructure and Services steps, or try rephrasing your project details with more specific tool names (e.g. Salesforce, Slack, AWS).",
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, fallbackMessage]);
+        return;
+      }
+
+      // ── State mapping with flexible key normalization ──
+      // Support both canonical keys (selectedCRMs) and shorthand keys (CRMs)
+      const normalizedData = {
+        selectedCRMs: parsedData.selectedCRMs || parsedData.CRMs || [],
+        selectedClouds: parsedData.selectedClouds || parsedData.Clouds || [],
+        selectedIntegrations: parsedData.selectedIntegrations || parsedData.Integrations || [],
+        selectedAITools: parsedData.selectedAITools || parsedData.AITools || [],
+        additionalModules: parsedData.additionalModules || parsedData.Modules || [],
+        powerUps: parsedData.powerUps || parsedData.PowerUps || [],
+      };
+
+      // Apply to form state via parent callback
+      if (onAutofill) {
+        onAutofill(normalizedData);
+
+        // Build confirmation message listing what was applied
+        const appliedLines: string[] = [];
+        if (normalizedData.selectedCRMs.length) appliedLines.push(`- **CRMs:** ${normalizedData.selectedCRMs.join(', ')}`);
+        if (normalizedData.selectedClouds.length) appliedLines.push(`- **Clouds:** ${normalizedData.selectedClouds.join(', ')}`);
+        if (normalizedData.selectedIntegrations.length) appliedLines.push(`- **Integrations:** ${normalizedData.selectedIntegrations.join(', ')}`);
+        if (normalizedData.selectedAITools.length) appliedLines.push(`- **AI Tools:** ${normalizedData.selectedAITools.join(', ')}`);
+        if (normalizedData.additionalModules.length) appliedLines.push(`- **Modules:** ${normalizedData.additionalModules.join(', ')}`);
+        if (normalizedData.powerUps.length) appliedLines.push(`- **Power-Ups:** ${normalizedData.powerUps.join(', ')}`);
+
+        const confirmationText = appliedLines.length > 0
+          ? `✅ **Estimator Updated!** I've automatically selected the CRMs, Clouds, and Tools based on your description.\n\n**Configuration Applied:**\n${appliedLines.join('\n')}`
+          : "✅ **Estimator Updated!** However, I wasn't able to identify specific tools from your description. You may want to manually select your infrastructure.";
+
+        const botMessage: Message = {
+          id: Date.now().toString() + "-autofill-success",
+          text: confirmationText,
+          sender: "bot",
+          timestamp: new Date(),
+          isJson: true,
+          isEstimatorUpdate: true,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }
+    } catch (error) {
+      console.error("Autofill fetch error:", error);
+      const errorMessage: Message = {
+        id: Date.now().toString() + "-autofill-fetch-error",
+        text: "I apologize, but I'm having trouble connecting right now. Please try again in a moment.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsAutofilling(false);
+      setIsLoading(false);
+    }
   };
 
   const handleDurationSelect = (messageId: string, duration: '15min' | '30min' | '60min') => {
@@ -750,7 +895,7 @@ export function AIChatbot({
                         handleSendMessage(prompt);
                       }
                     }}
-                    disabled={isLoading}
+                    disabled={isLoading || isAutofilling}
                     className={`text-xs px-3 py-1.5 rounded-full transition-all text-left border flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed ${
                       isPrimaryAI
                         ? "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:scale-[1.02] active:scale-[0.98] shadow-sm font-medium"
@@ -773,13 +918,13 @@ export function AIChatbot({
                   e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendMessage())
                 }
                 placeholder="Describe your project..."
-                disabled={isLoading}
+                disabled={isLoading || isAutofilling}
                 rows={1}
                 className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 resize-none overflow-hidden min-h-[40px] max-h-[88px] chat-scroll-area"
               />
               <button
                 onClick={() => handleSendMessage()}
-                disabled={!inputValue.trim() || isLoading}
+                disabled={!inputValue.trim() || isLoading || isAutofilling}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SendIcon size={18} />
