@@ -56,20 +56,29 @@ export function Navigation({
     <nav className="sticky top-0 z-50 bg-[#EFF6FF]/90 backdrop-blur-md border-b border-blue-100 px-[20px] py-[0px]">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-[116px]">
-          {/* Logo - Full horizontal logo on lg+, shield icon on md-lg */}
-          <div className="py-4 hidden lg:block">
+          {/* Logo - always top-left on all viewports */}
+          <div className="py-4 shrink-0">
             <a href="https://bktadvisory.com" className="block">
-              <img src={logo} alt="BKT Advisory Logo" className="h-[68px] w-auto" />
-            </a>
-          </div>
-          <div className="py-4 hidden md:block lg:hidden">
-            <a href="https://bktadvisory.com" className="block">
-              <img src={mobileLogo} alt="BKT Advisory" className="h-[60px] w-auto" />
+              <img
+                src={logo}
+                alt="BKT Advisory Logo"
+                className="h-[68px] w-auto hidden xl:block"
+              />
+              <img
+                src="https://hjrvtzkktodoxigezxqy.supabase.co/storage/v1/object/public/Logos/BKT%20Advisory%20-%20Icon%20Logo%20(Transparent).png"
+                alt="BKT Advisory"
+                className="h-[70px] w-auto hidden md:block xl:hidden"
+              />
+              <img
+                src="https://hjrvtzkktodoxigezxqy.supabase.co/storage/v1/object/public/Logos/BKT%20Advisory%20-%20Icon%20Logo%20(Transparent).png"
+                alt="BKT Advisory"
+                className="h-[70px] w-auto block md:hidden"
+              />
             </a>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             <a href="https://bktadvisory.com/#work" className="text-slate-900 hover:text-blue-700 transition-colors relative group">
               Work
               <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-700 group-hover:w-full transition-all duration-300"></span>
@@ -94,11 +103,10 @@ export function Navigation({
             <ScheduleCallButton variant="nav" />
           </div>
 
-          {/* Mobile: shield icon (right-anchored) + hamburger */}
-          <div className="md:hidden flex items-center gap-3 ml-auto">
-            <a href="https://bktadvisory.com" className="block">
-              <img src={mobileLogo} alt="BKT Advisory" className="h-[48px] w-auto" />
-            </a>
+          {/* Tablet Navigation (md to lg) - only icon logo, no nav links */}
+
+          {/* Mobile: hamburger (right-anchored) */}
+          <div className="lg:hidden flex items-center ml-auto">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 text-slate-900 hover:text-slate-700"
@@ -110,7 +118,7 @@ export function Navigation({
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-blue-100">
+          <div className="lg:hidden py-4 border-t border-blue-100">
             <div className="flex flex-col gap-4">
               <a href="https://bktadvisory.com/#work" className="text-slate-900 hover:text-blue-700 transition-colors text-left">
                 Work
