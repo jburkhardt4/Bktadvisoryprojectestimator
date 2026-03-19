@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { projectId, publicAnonKey } from '../utils/supabase/info';
+
 // Icon components to avoid lucide-react import issue
 const FileCheckIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -29,7 +32,62 @@ const ArrowRightIcon = ({ className, size }: { className?: string; size?: number
   </svg>
 );
 
+const XIcon = ({ size }: { size?: number }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const Loader2Icon = ({ size }: { size?: number }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
+
+const CheckCircleIcon = ({ size }: { size?: number }) => (
+  <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
+
 export function SelectedWork() {
+  const [modalCase, setModalCase] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ name: '', email: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState<string | null>(null);
+
+  const handleRequestCaseStudy = async () => {
+    if (!formData.email.trim()) return;
+    setSubmitting(true);
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-07a007e1/request-case-study`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`,
+          },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            caseStudy: modalCase,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error('Request failed');
+      setSubmitted(modalCase);
+      setModalCase(null);
+      setFormData({ name: '', email: '' });
+    } catch {
+      alert('Unable to send request. Please try again later.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const cases = [
     {
       icon: FileCheckIcon,
@@ -109,16 +167,77 @@ export function SelectedWork() {
                   </div>
 
                   {/* CTA */}
-                  <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 group">
-                    Request Case Study
-                    <ArrowRightIcon size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  {submitted === caseStudy.label ? (
+                    <div className="w-full py-3 px-4 bg-green-50 text-green-700 rounded-lg flex items-center justify-center gap-2 border border-green-200">
+                      <CheckCircleIcon size={16} />
+                      <span className="text-sm font-medium">Request Sent</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setModalCase(caseStudy.label)}
+                      className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 group"
+                    >
+                      Request Case Study
+                      <ArrowRightIcon size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Case Study Request Modal */}
+      {modalCase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Request Case Study</h3>
+              <button
+                onClick={() => setModalCase(null)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <XIcon size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              Enter your details to receive the <span className="font-medium">{modalCase}</span> case study.
+            </p>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Your name"
+                value={formData.name}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              <input
+                type="email"
+                placeholder="Work email *"
+                value={formData.email}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                required
+              />
+            </div>
+            <button
+              onClick={handleRequestCaseStudy}
+              disabled={submitting || !formData.email.trim()}
+              className="mt-4 w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+            >
+              {submitting ? (
+                <>
+                  <Loader2Icon size={16} />
+                  Sending...
+                </>
+              ) : (
+                'Send Request'
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

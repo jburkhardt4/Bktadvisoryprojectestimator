@@ -871,6 +871,72 @@ app.post(`${ROUTE_PREFIX}/submit-quote`, async (c) => {
 });
 
 // ============================================================================
+// CASE-STUDY REQUEST
+// ============================================================================
+
+app.post(`${ROUTE_PREFIX}/request-case-study`, async (c) => {
+  try {
+    const body = (await c.req.json()) as {
+      name?: string;
+      email?: string;
+      caseStudy?: string;
+    };
+
+    const name = asString(body.name).trim();
+    const email = asString(body.email).trim();
+    const caseStudy = asString(body.caseStudy).trim();
+
+    if (!email || !caseStudy) {
+      return c.json(
+        { error: "Missing required fields: email and caseStudy" },
+        400,
+      );
+    }
+
+    const googleScriptUrl =
+      "https://script.google.com/macros/s/AKfycbyUYuS-Bq_AjA_zw6aqHSyLdNzbQifN7McyV6_RF0dtLhvk7b1fntqOWjaqH1nrZI1_/exec";
+
+    const payload = {
+      type: "case_study_request",
+      name,
+      email,
+      caseStudy,
+      requestedAt: new Date().toISOString(),
+    };
+
+    if (googleScriptUrl.includes("script.google.com")) {
+      console.log("📤 Sending case-study request to Google Script...");
+
+      const googleResponse = await fetch(googleScriptUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!googleResponse.ok) {
+        const errorText = await googleResponse.text();
+        console.error(
+          `❌ Google Script Failed: ${googleResponse.status} ${googleResponse.statusText}`,
+        );
+        console.error(`Response body: ${errorText}`);
+      } else {
+        const responseText = await googleResponse.text();
+        console.log(`✅ Google Script Success: ${responseText}`);
+      }
+    }
+
+    console.log("📊 Case study request processed:", payload);
+
+    return c.json({
+      success: true,
+      message: "Case study request received",
+    });
+  } catch (error) {
+    return handleApiError(c, error, "Failed to process case study request");
+  }
+});
+
+// ============================================================================
 // SERVER
 // ============================================================================
 
