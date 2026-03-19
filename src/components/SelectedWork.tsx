@@ -81,7 +81,8 @@ export function SelectedWork() {
       setSubmitted(modalCase);
       setModalCase(null);
       setFormData({ name: '', email: '' });
-    } catch {
+    } catch (error) {
+      console.error('Case study request failed:', error);
       alert('Unable to send request. Please try again later.');
     } finally {
       setSubmitting(false);
