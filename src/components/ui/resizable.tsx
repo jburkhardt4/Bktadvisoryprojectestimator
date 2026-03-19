@@ -1,10 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { GripVerticalIcon } from "lucide-react@0.487.0";
 import * as ResizablePrimitive from "react-resizable-panels@2.1.7";
 
 import { cn } from "./utils";
+
+const GripVerticalIcon = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+);
 
 function ResizablePanelGroup({
   className,

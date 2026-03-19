@@ -17,7 +17,6 @@
         'react-day-picker@8.10.1': 'react-day-picker',
         'openai@4.86.0': 'openai',
         'next-themes@0.4.6': 'next-themes',
-        'lucide-react@0.487.0': 'lucide-react',
         'input-otp@1.4.2': 'input-otp',
         'figma:asset/c9b7fbd7a0a9b7fe816298e590cdf7f50d449a06.png': path.resolve(__dirname, './src/assets/c9b7fbd7a0a9b7fe816298e590cdf7f50d449a06.png'),
         'figma:asset/9cffe000c5dffcabac269f49ac3d9d3bd3026163.png': path.resolve(__dirname, './src/assets/9cffe000c5dffcabac269f49ac3d9d3bd3026163.png'),

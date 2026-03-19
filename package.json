@@ -41,7 +41,6 @@
     "html-to-image": "*",
     "input-otp": "^1.4.2",
     "jspdf": "*",
-    "lucide-react": "^0.487.0",
     "mammoth": "*",
     "motion": "*",
     "next-themes": "^0.4.6",
