@@ -19,14 +19,13 @@ import type {
 // Helpers
 // ---------------------------------------------------------------------------
 
-let counter = 0;
-
-/** Generate a unique ID. In production the portal should replace this with its own ID strategy (e.g. UUID v4). */
+/** Generate a unique ID. In production the portal should replace this with its own ID strategy (e.g. database-generated IDs). */
 function generateId(prefix: string): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 8);
-  counter += 1;
-  return `${prefix}_${timestamp}_${random}_${counter}`;
+  const uuid =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 10)}`;
+  return `${prefix}_${uuid}`;
 }
 
 /** Return the current time as an ISO-8601 string. */
