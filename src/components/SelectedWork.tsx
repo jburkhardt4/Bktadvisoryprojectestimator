@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { projectId, publicAnonKey } from "../utils/supabase/info";
-
 // Icon components to avoid lucide-react import issue
 const FileCheckIcon = ({ className, size }: { className?: string; size?: number }) => (
   <svg width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -32,49 +29,7 @@ const ArrowRightIcon = ({ className, size }: { className?: string; size?: number
   </svg>
 );
 
-const CASE_STUDY_ENDPOINT = `https://${projectId}.supabase.co/functions/v1/make-server-07a007e1/request-case-study`;
-
 export function SelectedWork() {
-  const [requestingIndex, setRequestingIndex] = useState<number | null>(null);
-  const [requestedIndexes, setRequestedIndexes] = useState<Set<number>>(new Set());
-
-  const handleRequestCaseStudy = async (
-    index: number,
-    label: string,
-    summary: string,
-  ) => {
-    if (requestingIndex !== null || requestedIndexes.has(index)) return;
-
-    setRequestingIndex(index);
-
-    try {
-      const response = await fetch(CASE_STUDY_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${publicAnonKey}`,
-        },
-        body: JSON.stringify({
-          caseStudyLabel: label,
-          caseStudySummary: summary,
-          sourceUrl: window.location.href,
-          requestedAt: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Request failed (${response.status})`);
-      }
-
-      setRequestedIndexes((prev) => new Set([...prev, index]));
-    } catch (err) {
-      console.error("[SelectedWork] Case study request failed:", err);
-      alert("Something went wrong. Please try again or contact us directly.");
-    } finally {
-      setRequestingIndex(null);
-    }
-  };
-
   const cases = [
     {
       icon: FileCheckIcon,
@@ -121,9 +76,6 @@ export function SelectedWork() {
         <div className="grid md:grid-cols-3 gap-8">
           {cases.map((caseStudy, index) => {
             const Icon = caseStudy.icon;
-            const isLoading = requestingIndex === index;
-            const isDone = requestedIndexes.has(index);
-
             return (
               <div 
                 key={index}
@@ -157,25 +109,9 @@ export function SelectedWork() {
                   </div>
 
                   {/* CTA */}
-                  <button
-                    onClick={() => handleRequestCaseStudy(index, caseStudy.label, caseStudy.summary)}
-                    disabled={isLoading || isDone}
-                    className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 group transition-colors ${
-                      isDone
-                        ? "bg-green-600 text-white cursor-default"
-                        : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
-                    }`}
-                  >
-                    {isDone ? (
-                      "Request Sent ✓"
-                    ) : isLoading ? (
-                      "Sending…"
-                    ) : (
-                      <>
-                        Request Case Study
-                        <ArrowRightIcon size={16} className="group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
+                  <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 group">
+                    Request Case Study
+                    <ArrowRightIcon size={16} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>

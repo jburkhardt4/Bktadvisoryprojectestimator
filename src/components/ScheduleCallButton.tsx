@@ -34,7 +34,7 @@ export function ScheduleCallButton({
     
     switch (variant) {
       case 'nav':
-        return `${baseClass} px-8 py-3.5 bg-blue-700 text-white hover:bg-blue-600 hover:shadow-[0_0_30px_rgba(29,78,216,0.5)] ${className}`;
+        return `${baseClass} whitespace-nowrap px-3.5 py-2 bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(29,78,216,0.4)] hover:scale-[1.02] active:scale-[0.98] ${className}`;
       case 'footer':
         return `${baseClass} px-5 py-2 bg-blue-600 text-white text-sm hover:bg-blue-700 ${className}`;
       case 'secondary':
