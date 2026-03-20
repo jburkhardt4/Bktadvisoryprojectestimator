@@ -32,11 +32,11 @@ export type ActivityEventType =
   | "completed"
   | "archived";
 
-/** A single entry in the project activity feed. */
+/** A single entry in the activity feed (may reference a quote, project, or other record). */
 export interface ActivityEvent {
   id: string;
   type: ActivityEventType;
-  projectId: string;
+  recordId: string;
   description: string;
   timestamp: string; // ISO-8601
   actor: string;

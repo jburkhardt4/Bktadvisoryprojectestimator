@@ -77,7 +77,7 @@ export const sampleActivityEvents: ActivityEvent[] = [
   {
     id: "evt_sample_001",
     type: "quote_generated",
-    projectId: "quote_sample_abc123_1",
+    recordId: "quote_sample_abc123_1",
     description: "Quote generated for Acme Corp",
     timestamp: "2026-03-19T00:00:00.000Z",
     actor: "jane.doe@acme.com",
@@ -85,7 +85,7 @@ export const sampleActivityEvents: ActivityEvent[] = [
   {
     id: "evt_sample_002",
     type: "quote_sent",
-    projectId: "quote_sample_abc123_1",
+    recordId: "quote_sample_abc123_1",
     description: "Quote sent to jane.doe@acme.com",
     timestamp: "2026-03-19T01:00:00.000Z",
     actor: "sales@bktadvisory.com",
@@ -93,7 +93,7 @@ export const sampleActivityEvents: ActivityEvent[] = [
   {
     id: "evt_sample_003",
     type: "quote_accepted",
-    projectId: "quote_sample_abc123_1",
+    recordId: "quote_sample_abc123_1",
     description: "Quote accepted by client",
     timestamp: "2026-03-20T14:30:00.000Z",
     actor: "jane.doe@acme.com",
@@ -101,7 +101,7 @@ export const sampleActivityEvents: ActivityEvent[] = [
   {
     id: "evt_sample_004",
     type: "project_created",
-    projectId: "proj_sample_ghi012_1",
+    recordId: "proj_sample_ghi012_1",
     description: "Project created from accepted quote",
     timestamp: "2026-03-20T14:30:01.000Z",
     actor: "system",

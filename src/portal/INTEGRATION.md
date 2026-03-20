@@ -36,7 +36,7 @@ that the portal can persist and manage.
 
 ## Mapper Functions
 
-### `mapQuoteDataToQuoteRecord(quoteData, actor?)`
+### `mapQuoteDataToQuoteRecord(quoteData)`
 
 Transforms estimator `QuoteData` → `QuoteRecord`.
 
@@ -59,7 +59,7 @@ Creates a `ProjectRecord` from an accepted `QuoteRecord`.
 - Sets initial status to `"intake"`.
 - **Call site:** when the portal marks a quote as accepted.
 
-### `createActivityEvent(type, projectId, description, actor)`
+### `createActivityEvent(type, recordId, description, actor)`
 
 Factory for individual `ActivityEvent` objects.
 
@@ -158,7 +158,10 @@ The **Bktadvisory** portal repository should:
 4. **Replace the ID generator** (`generateId`) with a production-grade
    strategy (e.g. UUID v4 or database-generated IDs).
 
-5. **Append activity events** to records as the lifecycle progresses:
+5. **Persist activity events** in a separate `activity_events` table (or
+   equivalent), keyed by `recordId` as a foreign key. The `recordId` field
+   is entity-agnostic — it may reference a quote, project, or any other
+   record. Activity events are appended as the lifecycle progresses:
    ```ts
    const event = createActivityEvent(
      "quote_sent",
@@ -166,6 +169,7 @@ The **Bktadvisory** portal repository should:
      "Quote sent to client@example.com",
      "sales@bktadvisory.com",
    );
+   // Persist `event` to the activity_events table
    ```
 
 ---

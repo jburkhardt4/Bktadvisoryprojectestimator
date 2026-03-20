@@ -47,20 +47,20 @@ function nowISO(): string {
  * Create an activity event for a lifecycle milestone.
  *
  * @param type        - one of the canonical activity event types
- * @param projectId   - the project or record this event belongs to
+ * @param recordId    - the quote, project, or other record this event belongs to
  * @param description - human-readable description of the event
  * @param actor       - email or user id of the person who triggered the event
  */
 export function createActivityEvent(
   type: ActivityEventType,
-  projectId: string,
+  recordId: string,
   description: string,
   actor: string,
 ): ActivityEvent {
   return {
     id: generateId("evt"),
     type,
-    projectId,
+    recordId,
     description,
     timestamp: nowISO(),
     actor,
@@ -83,16 +83,14 @@ export function createActivityEvent(
 /**
  * Transform estimator `QuoteData` into a portal `QuoteRecord`.
  *
- * The resulting record has status `"quoted"` (the quote has been generated)
- * and an initial `quote_generated` activity event. The caller can later
- * update the status and append events as the quote moves through its lifecycle.
+ * The resulting record has status `"quoted"` (the quote has been generated).
+ * The caller can later update the status and append activity events as the
+ * quote moves through its lifecycle.
  *
  * @param quoteData - output from the estimator's `calculateQuote` function
- * @param actor     - (optional) email of the user who generated the quote
  */
 export function mapQuoteDataToQuoteRecord(
   quoteData: QuoteData,
-  actor?: string,
 ): QuoteRecord {
   const now = nowISO();
   const { formData } = quoteData;
