@@ -134,7 +134,7 @@ export function Navigation({
 
               {/* Sign In */}
               <a
-                to="https://bktadvisory.com/auth"
+                href="https://bktadvisory.com/auth"
                 className="whitespace-nowrap inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 hover:text-blue-700 border border-slate-300 hover:border-blue-400 rounded-lg transition-all duration-200 relative group cursor-pointer"
               >
                 <UserIcon size={15} />
