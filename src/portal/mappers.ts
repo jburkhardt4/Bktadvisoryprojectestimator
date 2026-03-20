@@ -167,7 +167,7 @@ export function mapAcceptedQuoteToProjectRecord(
     name: `${quote.companyName} – Project`,
     companyName: quote.companyName,
     status: "intake",
-    owner: actor ?? "",
+    owner: actor ?? "system",
     targetMilestone: "",
     createdAt: now,
     updatedAt: now,

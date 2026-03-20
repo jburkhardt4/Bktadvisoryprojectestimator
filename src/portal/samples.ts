@@ -125,7 +125,7 @@ export const sampleProjectRecord: ProjectRecord = {
   companyName: "Acme Corp",
   status: "intake",
   owner: "system",
-  targetMilestone: "",
+  targetMilestone: "Discovery Phase",
   createdAt: "2026-03-20T14:30:01.000Z",
   updatedAt: "2026-03-20T14:30:01.000Z",
 };
