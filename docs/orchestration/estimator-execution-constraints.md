@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the repository-specific constraints for work performed in `jburkhardt4/Bktadvisoryprojectestimator`. It exists to prevent estimator work from drifting into unrelated marketing-site concerns while still aligning the estimator with the broader BKT Advisory launch plan.
+This document defines the repository-specific constraints for work performed in `jburkhardt4/BKT-ProjectEstimator`. It exists to prevent estimator work from drifting into unrelated marketing-site concerns while still aligning the estimator with the broader BKT Advisory launch plan.
 
 ## Repository Scope
 
